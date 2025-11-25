@@ -25,6 +25,7 @@ async function run() {
 
     const db = client.db("kuttodb");
     const recentlistsCollection = db.collection("recentlist");
+    const orderCollection= db.collection("orders");
 
  
     // GET all recent listings
@@ -84,14 +85,28 @@ async function run() {
       });
     });
 
+
+// order product
+    app.post('/orders', async (req, res) => { 
+  const data = req.body;
+  const result = await orderCollection.insertOne(data);
+
+  res.send({
+    acknowledged: true,
+    result
+  });
+})
+
+
+
+
+
     // Update item
     app.put ('/recentlist/:id', async (req, res) => {
 
       const {id} = req.params;
       const data = req.body;
-      console.log(id);
-      console.log(data);
-
+ 
       const objectId = new ObjectId(id);
       const filter ={ _id: objectId };
       const update ={
@@ -124,6 +139,14 @@ async function run() {
     });
 
 
+    // recent 6 data
+    app.get('/recent-items' , async (req, res) => {
+
+
+      const result = await recentlistsCollection.find().sort({ date: -1 }).limit(6).toArray();
+      res.send(result);
+
+    });
 
 
 
