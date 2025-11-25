@@ -1,18 +1,16 @@
 const express = require('express');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
+
 const app = express();
 const port = 3000;
 
+app.use(cors());
+app.use(express.json());
 
-//
-
-
-//mongo db connection
-
+// MongoDB Connection
 const uri = "mongodb+srv://kuttodb:NB5CjFvz1n0Nf1Cf@cluster0.lgpbd6x.mongodb.net/?appName=Cluster0";
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -23,54 +21,82 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-
     await client.connect();
+
     const db = client.db("kuttodb");
     const recentlistsCollection = db.collection("recentlist");
 
-    app.get('/recentlist', async (req, res)=>{
-
+ 
+    // GET all recent listings
+   
+    app.get('/recentlist', async (req, res) => {
       const result = await recentlistsCollection.find().toArray();
-      console.log(result);
+      res.send(result);
+    });
 
 
+    // GET single listing by ID
 
-      res.send(result)
-    })
+    app.get('/recentlist/:id', async (req, res) => {
+      const { id } = req.params;
+      const objectId = new ObjectId(id);
+
+      const result = await recentlistsCollection.findOne({ _id: objectId });
+
+      res.send({
+        success: true,
+        result
+      });
+    });
+
+  // GET listings by user email
+    app.get('/mylistings', async (req, res) => {
+      const email = req.query.email;
+
+      if (!email) {
+        return res.send({
+          success: false,
+          message: "Email is required"
+        });
+      }
+
+      const result = await recentlistsCollection.find({ email: email }).toArray();
+
+      res.send({
+        success: true,
+        count: result.length,
+        data: result
+      });
+    });
 
 
+    
+    // POST – Add new listing
+  
+    app.post('/recentlist', async (req, res) => {
+      const data = req.body;
 
+      const result = await recentlistsCollection.insertOne(data);
 
+      res.send({
+        acknowledged: true,
+        result
+      });
+    });
 
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
+    console.log("MongoDB connected successfully!");
+
+  } catch (error) {
+    console.error(error);
   }
 }
+
 run().catch(console.dir);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.listen(port, () =>{
-    console.log(`Example app listening at http://localhost:${port}`);
-})
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+});
