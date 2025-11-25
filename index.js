@@ -84,6 +84,52 @@ async function run() {
       });
     });
 
+    // Update item
+    app.put ('/recentlist/:id', async (req, res) => {
+
+      const {id} = req.params;
+      const data = req.body;
+      console.log(id);
+      console.log(data);
+
+      const objectId = new ObjectId(id);
+      const filter ={ _id: objectId };
+      const update ={
+        $set: data}
+      const result = await recentlistsCollection.updateOne(filter, update);
+
+      res.send(
+        {
+          success: true,
+          result
+        });
+    })
+
+    // DELETE – Delete listing by ID
+    app.delete('/recentlist/:id', async (req, res) => {
+      const { id } = req.params;
+      const objectId = new ObjectId(id);
+      const filter = { _id: objectId };
+     const result = await recentlistsCollection.deleteOne(filter);
+
+
+      res.send(
+        {
+          success: true,
+        }
+      )
+
+
+
+    });
+
+
+
+
+
+
+
+
     console.log("MongoDB connected successfully!");
 
   } catch (error) {
