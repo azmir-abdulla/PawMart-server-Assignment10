@@ -95,7 +95,35 @@ async function run() {
     acknowledged: true,
     result
   });
-})
+});
+
+
+
+    // my orders
+    app.get('/myorders', async (req, res) => {
+      const email = req.query.email;
+
+      if (!email) {
+        return res.send({
+          success: false,
+          message: "Email is required"
+        });
+      }
+
+      const result = await orderCollection.find({ email: email }).toArray();
+
+      res.send({
+        success: true,
+        count: result.length,
+        data: result
+      });
+    });
+
+
+
+
+
+
 
 
 
@@ -131,6 +159,7 @@ async function run() {
       res.send(
         {
           success: true,
+          result
         }
       )
 
