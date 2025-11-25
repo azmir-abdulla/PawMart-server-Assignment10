@@ -1,7 +1,7 @@
 const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
-
+require('dotenv').config();
 const app = express();
 const port = 3000;
 
@@ -9,7 +9,10 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
-const uri = "mongodb+srv://kuttodb:NB5CjFvz1n0Nf1Cf@cluster0.lgpbd6x.mongodb.net/?appName=Cluster0";
+// const uri = "mongodb+srv://kuttodb:NB5CjFvz1n0Nf1Cf@cluster0.lgpbd6x.mongodb.net/?appName=Cluster0";
+const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.lgpbd6x.mongodb.net/?appName=Cluster0`;
+
+
 
 const client = new MongoClient(uri, {
   serverApi: {
